@@ -1,5 +1,5 @@
 # This will be the ChatBot code in Python
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for
 import pandas as pd
 import requests
 import re
@@ -81,17 +81,17 @@ def chat():
                         "However, I couldn't retrieve live wind data."
                     )
             else:
-                bot_reply = f"I could not pull any weather data for {city}. Double check your spelling and retry."
+                bot_reply = f"I could not pull any weather data. Double check your spelling and retry."
         else:
-            bot_reply = f"Make sure your city choice, {city}, is a world capital. Or double check your spelling and retry."
+            bot_reply = f"Make sure your city choice is a world capital. Or double check your spelling and retry."
         session['history'].append({'user': user_message, 'bot': bot_reply})
         session.modified = True
     return render_template('chat.html', history=session.get('history', []))
 
-@app.route('/clear')
+@app.route('/clear', methods=['GET', 'POST'])
 def clear():
     session.pop('history', None)
-    return render_template('chat.html', history=[])
+    return redirect(url_for('chat'))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080)
