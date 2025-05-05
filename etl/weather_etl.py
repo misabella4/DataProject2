@@ -6,8 +6,8 @@ def extract_data(file_path):
     df = pd.read_csv(file_path)
     return df
 
+
 def prepare_data(df):
-    # Only keep key columns
     df = df[['country', 'location_name', 'latitude', 'longitude', 'temperature_celsius', 'uv_index']].copy()
     df = df.rename(columns={
         'location_name': 'city',
@@ -15,6 +15,11 @@ def prepare_data(df):
         'uv_index': 'uv'
     })
     df.dropna(subset=['country', 'city', 'temp', 'uv', 'latitude', 'longitude'], inplace=True)
+    # Normalize case
+    df['city'] = df['city'].str.title()
+    df['country'] = df['country'].str.title()
+    # Drop duplicate (country, city) pairs
+    df.drop_duplicates(subset=['country', 'city'], keep='first', inplace=True)
     return df
 
 def load_data(df, output_path='data/local_weather.csv'):

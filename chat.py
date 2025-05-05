@@ -1,8 +1,6 @@
 # This will be the ChatBot code in Python
 from flask import Flask, render_template, request, session, redirect, url_for
-import pandas as pd
-import requests
-import re
+import pandas as pd, requests, re
 
 app = Flask(__name__)
 app.secret_key = "your-secret-key"  # Required for session support
@@ -57,8 +55,10 @@ def chat():
     if request.method == 'POST':
         user_message = request.form['message']
         city = None
+        user_message_lower = user_message.lower()
         for c in weather_df['city']:
-            if c.lower() in user_message.lower():
+            city_lower = c.lower()
+            if re.search(rf'\b{re.escape(city_lower)}\b', user_message_lower):
                 city = c
                 break
         if city:
@@ -88,8 +88,9 @@ def chat():
         session.modified = True
     return render_template('chat.html', history=session.get('history', []))
 
-@app.route('/clear', methods=['GET', 'POST'])
+@app.route('/clear', methods=['GET'])
 def clear():
+    print("Clearing chat history...")
     session.pop('history', None)
     return redirect(url_for('chat'))
 
