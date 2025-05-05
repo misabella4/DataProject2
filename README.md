@@ -21,7 +21,7 @@ This is a Flask-based chatbot app that allows users to ask weather-related quest
 - `/templates/` folder contains more visual code for the appearance of the app
 
 ## GCP Instance
-The chatbot can be deployed on a Google Cloud VM! It is publicly accessible at: *[http://34.66.92.177:8080](http://34.66.92.177:8080)**
+The chatbot can be deployed on a Google Cloud VM! It is publicly accessible at: *[http://34.66.92.177:8080](http://34.66.92.177:8080)*
 
 ## Reflection
 See the reflection.md tab in GitHub repo!
