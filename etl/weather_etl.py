@@ -7,14 +7,14 @@ def extract_data(file_path):
     return df
 
 def prepare_data(df):
-    # Transform, simplify, and clean up raw data
-    df = df[['country', 'location_name', 'temperature_celsius', 'uv_index']].copy()
+    # Only keep key columns
+    df = df[['country', 'location_name', 'latitude', 'longitude', 'temperature_celsius', 'uv_index']].copy()
     df = df.rename(columns={
         'location_name': 'city',
         'temperature_celsius': 'temp',
         'uv_index': 'uv'
     })
-    df.dropna(subset=['country', 'city', 'temp', 'uv'], inplace=True)
+    df.dropna(subset=['country', 'city', 'temp', 'uv', 'latitude', 'longitude'], inplace=True)
     return df
 
 def load_data(df, output_path='data/local_weather.csv'):
