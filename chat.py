@@ -27,57 +27,71 @@ def extract_first_answer(text):
     return sentence.strip()
 
 # API Call Function
-def get_wind_speed(city_name):
+def get_wind_speed(lat, long):
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&current=wind_speed_10m"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        wind_speed = data.get('current', {}).get('wind_speed_10m')
+        return wind_speed
+    except Exception as e:
+        print(f"Error getting data from API: {e}")
+        return None
 
-# 🔹 Home route
 @app.route('/')
 def home():
     return render_template('home.html')
 
-# 🔹 About route
 @app.route('/about')
 def about():
     return "This is a weather Flask app."
 
-# 🔹 Debug route
 @app.route('/debug')
 def debug():
     return "This is the debug route. Everything's (hopefully) fine."
 
-# 🔹 Chat route
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
     if 'history' not in session:
         session['history'] = []
     if request.method == 'POST':
         user_message = request.form['message']
-        # Call the bot backend
-        try:
-            api_response = requests.post(
-                'http://34.135.90.197/chat',
-                json={'message': user_message}
-            )
-            if api_response.status_code == 200:
-                data = api_response.json()
-                raw_reply = data.get('reply', "The bot didn't say anything.")
-                bot_reply = extract_first_answer(raw_reply)
+        city = None
+        for c in weather_df['city']:
+            if c.lower() in user_message.lower():
+                city = c
+                break
+        if city:
+            match = weather_df[weather_df['city'].str.lower() == city.lower()]
+            if not match.empty:
+                row = match.iloc[0]
+                temperature = row['temp']
+                uv_index = row['uv']
+                latitude = row['latitude']
+                longitude = row['longitude']
+                wind = get_wind_speed(latitude, longitude)
+                if wind is not None:
+                    bot_reply = (
+                        f"In {city}, the local temperature is {temperature}°C with a UV index of {uv_index}. "
+                        f"In addition, the current wind speed is {wind} km/h."
+                    )
+                else:
+                    bot_reply = (
+                        f"In {city}, the local temperature is {temperature}°C with a UV index of {uv_index}. "
+                        "However, I couldn't retrieve live wind data."
+                    )
             else:
-                bot_reply = f"Bot server error: {api_response.status_code}"
-        except Exception as e:
-            bot_reply = f"Error: {e}"
-
-        # Append to chat history
+                bot_reply = f"I could not pull any weather data for {city}. Double check your spelling and retry."
+        else:
+            bot_reply = f"Make sure your city choice, {city}, is a world capital. Or double check your spelling and retry."
         session['history'].append({'user': user_message, 'bot': bot_reply})
         session.modified = True
-
     return render_template('chat.html', history=session.get('history', []))
 
-# 🔹 Clear chat history
 @app.route('/clear')
 def clear():
     session.pop('history', None)
     return render_template('chat.html', history=[])
 
-# 🔹 Run app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5050)
