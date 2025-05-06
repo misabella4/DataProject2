@@ -27,4 +27,4 @@ The chatbot can be deployed on a Google Cloud VM! It is publicly accessible at: 
 Our chatbot is also connected to Discord using `discord.py`. You can ask weather questions directly in a Discord server. The bot processes input using the same logic as it did on Flask and can respond in the same format with temperature, UV index, and live wind speed data.
 
 ## Reflection
-See the reflection.md tab in GitHub repo!
+See the Reflection_README.md tab in GitHub repo!
